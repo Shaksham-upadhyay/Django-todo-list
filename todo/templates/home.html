@@ -1,0 +1,95 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="static/home.css">
+    <title>Document</title>
+</head>
+<body>
+    <div class="container">
+    <h1>📝 Todo App</h1>
+    
+    <form method="post" class="add-box">
+    {% csrf_token %}
+
+    <span>Add Task</span>
+    
+    <input type="text" name="title" placeholder="Project Name">
+    
+    <button type="submit">Submit</button>
+</form>
+
+<div class="top-bar">
+    <form  method="get">
+        {% csrf_token %}
+        <input type="text" id="search" name="search" placeholder="SEARCH HERE" {% if search %}value="{{search}}"{% else %}value=""{% endif %}>
+        <button type="submit">DONE</button>
+        {% if search %}
+        <a href="?">RESET</a>
+        {% endif %}
+     </form>
+     
+    <form method="get">
+    <select name="sort" onchange="this.form.submit()">
+        <option value="">Sort</option>
+        <option value="title" {% if sort == "title" %}selected{% endif %}>Title</option>
+        <option value="date" {% if sort == "date" %}selected{% endif %}>Date</option>
+        <option value="completed" {% if sort == "completed" %}selected{% endif %}>Completed</option>
+    </select>
+</form>
+</div>
+<div class="table-container">
+    <table border="2px">
+        <tr>
+        <th>TASKS</th>
+        <th>ISCOMPLETED</th>
+        <th>START DATE AND TIME</th>
+        <th>END DATE AND TIME</th>
+        <th>COMPLETE❔</th>
+        <th>REMOVE</th>
+        </tr>
+        {% for i in page_obj %}
+        <tr>
+            <td>{{i.title}}</td>
+            <td> {% if i.iscompleted %}
+                    <p class="completed">✅ Completed</p> 
+                 {% else %}
+                    <p class="pending">❌ Pending</p>
+                 {% endif %}
+            </td>
+            
+            <td>{{i.created}}</td>
+            <td>
+                {{i.completed}}
+            </td>
+            <form action="{% url 'update' i.id %}" method="post">
+                {% csrf_token %}
+            <td><input type="checkbox" name="chck" id="chck" onchange= "this.form.submit()" {% if i.iscompleted %}checked{% endif %}></td>
+            </form>
+            <td><a href="/delete{{i.id}}" class="delete-btn">Delete</a></td>
+        </tr>
+        {% endfor %}
+    </table>
+</div>
+</div>
+
+    <div class="pagination">
+        {% if page_obj.has_previous %}
+            <a href="?page=1{% if sort %}&sort={{sort}}{% endif %}{% if search %}&search={{search}}{% endif %}"> FIRST</a>
+            <a href="?page={{ page_obj.previous_page_number }}{% if sort %}&sort={{sort}}{% endif %}{% if search %}&search={{search}}{% endif %}"><<</a>
+        {% endif %}
+
+        <span class="current">
+            Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}.
+        </span>
+
+        {% if page_obj.has_next %}
+            <a href="?page={{ page_obj.next_page_number }}{% if sort %}&sort={{sort}}{% endif %}{% if search %}&search={{search}}{% endif %}">>></a>
+            <a href="?page={{ page_obj.paginator.num_pages }}{% if sort %}&sort={{sort}}{% endif %}{% if search %}&search={{search}}{% endif %}">LAST </a>
+        {% endif %}
+   
+</div>
+</body>
+</html>
